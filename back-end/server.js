@@ -13,23 +13,17 @@ let {parse} = require('querystring')
 let request;
 let response;
 
-let handleRequest = (req, res) => {
-    req = checkEmptyURL(req)
+let getQuestions = () => {
 
-    /**
-     * Special Request filtering. Add cases to bypass standard file response.
-     */
-    switch (req.url.toString().toLowerCase()) {
-        case "/comp4537/labs/5/writedb.html":
-            lab5WriteHandler(req, res)
-            break
-        case "/comp4537/labs/5/readdb.html":
-            lab5ReadHandler(req, res)
-            break
-        default:
-            standardFileRequest(req, res)
-    }
-};
+}
+
+let addQuestion = () => {
+
+}
+
+let updateQuestion = () => {
+
+}
 
 // Request utils
 let getURLMIMEType = (currentURL) => {
@@ -62,6 +56,21 @@ let checkEmptyURL = (req) => {
 }
 
 // Request handling
+let handleRequest = (req, res) => {
+    req = checkEmptyURL(req)
+
+    /**
+     * Special Request filtering. Add cases to bypass standard file response.
+     */
+    switch (req.url.toString().toLowerCase()) {
+        case "/questions.http":
+            handleQuestions(req, res)
+            break
+        default:
+            standardFileRequest(req, res)
+    }
+};
+
 let standardFileRequest = (req, res) => {
     let mimeType = getURLMIMEType(req.url)
 
@@ -82,86 +91,14 @@ let standardFileRequest = (req, res) => {
     });
 }
 
-let lab5WriteHandler = (req, res) => {
+let handleQuestions = (req, res) => {
     if (req.method === "GET") {
-        standardFileRequest(req, res)
+        getQuestions()
     } else if (req.method === "POST") {
-        let body = "";
-
-        req.on("data", function (chunk) {
-            body += chunk;
-        });
-
-        req.on('end', () => {
-            let data = parse(body);
-            if (lab5Write(data.name, data.score)) {
-                res.end("Score Added");
-            } else {
-                res.end("An Error Occurred");
-            }
-        });
+        addQuestion()
+    } else if (req.method === "PUT") {
+        updateQuestion()
     }
-}
-
-let lab5Write = (name, score) => {
-    let connection = lab5DBConnect()
-
-    connection.connect(function(err) {
-        if (err) return false;
-        console.log("Connected!");
-        let sql = "INSERT INTO score (name, score) VALUES ('" + name + "', '" + score + "')";
-        connection.query(sql, function (err, result) {
-            if (err) return false;
-            console.log("1 record inserted");
-        });
-    });
-    return true
-}
-
-let lab5ReadHandler = (req, res) => {
-
-    request = req
-    response = res
-
-    console.log("read handler");
-    if (req.method === "GET") {
-        standardFileRequest(req, res)
-    } else if (req.method === "POST") {
-
-        let body = "";
-
-        req.on("data", function (chunk) {
-            body += chunk;
-        });
-
-        req.on('end', () => {
-            lab5Read();
-        });
-    }
-}
-
-let lab5Read = () => {
-    let connection = lab5DBConnect()
-
-    connection.connect(function(err) {
-        if (err) throw err;
-        connection.query("SELECT * FROM score", function (err, result, fields) {
-            if (err) throw err;
-            console.log(result);
-            let jsonData = JSON.stringify(result)
-            response.end(jsonData)
-        });
-    });
-}
-
-let lab5DBConnect = () => {
-    return mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        password: "31TTpUot!U%GMfv",
-        database: "lab5",
-    });
-
 }
 
 // Server

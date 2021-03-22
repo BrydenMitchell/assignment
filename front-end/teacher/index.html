@@ -56,33 +56,20 @@
 
     <div class="container marketing px-4">
 
-        <!-- Three columns of text below the carousel -->
         <div class="row">
-            <p class="display-2 text-center">Quiz Application</p>
-        </div><!-- /.row -->
-        <div class="row gx-5">
-            <div class="col-md-6 text-center">
-                <img class="bd-placeholder-img rounded-circle" width="140" height="140"
-                     src="assets/img/bryden.png" role="img" aria-label="Placeholder: 140x140"
-                     preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                </img>
+            <div class="col-12">
+                <h1>Quiz Editor</h1>
+            </div>
+        </div>
 
-                <h2>Student</h2>
-                <p></p>
-                <p><a class="btn btn-secondary" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" role="button">Take Quiz</a></p>
-            </div><!-- /.col-lg-4 -->
-            <div class="col-md-6 text-center">
-                <img class="bd-placeholder-img rounded-circle" width="140" height="140"
-                     src="assets/img/kevin.png" role="img" aria-label="Placeholder: 140x140"
-                     preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                </img>
+        <div class="row">
+            <div id="questions"></div>
+        </div>
 
-                <h2>Teacher</h2>
-                <p></p>
-                <p><a class="btn btn-secondary" href="./teacher" role="button">Login</a></p>
-            </div><!-- /.col-lg-4 -->
-        </div><!-- /.row -->
-
+        <div class="row">
+            <button id="addQuestion" onclick="addQuestion()">Add Question</button>
+            <button id="saveQuiz" onclick="saveQuestions()">Save Quiz</button>
+        </div>
 
     </div><!-- /.container -->
 
@@ -96,6 +83,9 @@
 
 
 <script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/question.js"></script>
+<script src="assets/js/answer.js"></script>
+<script src="assets/js/quizEditing.js"></script>
 
 
 </body>
