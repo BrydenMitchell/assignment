@@ -112,9 +112,6 @@ function addQuestion() {
 
 function findQuestion(id) {
     let intID = parseInt(id)
-    // var result = jsObjects.filter(obj => {
-    //     return obj.b === 6
-    // })
     return allQuestions.filter(obj => {
         return obj.id === intID
     })
@@ -125,6 +122,7 @@ function getQuestionGET() {
     xhttp.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             let result = JSON.parse(this.responseText)
+            console.log(result);
             addQuestionsHTML(createQuestions(result))
         }
     }
@@ -152,8 +150,9 @@ function createQuestionPOST(question) {
             // response
         }
     }
-    xhttp.open("POST", "/questions", true)
+    xhttp.open("POST", "/questions.http", true)
     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    console.log(JSON.stringify(question))
     xhttp.send(JSON.stringify(question));
 }
 
@@ -163,19 +162,16 @@ function saveQuestions() {
     let children  = toSaveQuestions.children
     for (let i = 0; i < children.length; i++) {
         let child = toSaveQuestions.children[i]
+        console.log(child);
         let question = findQuestion(child.id)
         if (question.length === 1) {
-
+            // updateQuestionPUT(child)
         } else if (question.length === 0) {
-
+            createQuestionPOST(child)
         } else {
             throw "data integrity issue"
         }
-
     }
-
-    // console.log(allQuestions);
-    // console.log(findQuestion(456));
 }
 
-addQuestionsHTML(createQuestions(getQuestionGET()))
+getQuestionGET()

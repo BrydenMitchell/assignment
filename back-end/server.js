@@ -12,13 +12,87 @@ let {parse} = require('querystring')
 
 let request;
 let response;
+let questions;
 
-let getQuestions = () => {
+let connection;
 
+let batchTotalNumber
+let batchCount;
+let batchCallback;
+
+// Database
+let dbConnect = () => {
+    return mysql.createConnection({
+        host: "localhost",
+        user: "root",
+        password: "root",
+        database: "quiz",
+        port: 8889
+    });
 }
 
-let addQuestion = () => {
+let getQuestionsComplete = () => {
+    response.end(JSON.stringify(questions))
+}
 
+let findQuestion = (id) => {
+    let intID = parseInt(id)
+    return questions.filter(obj => {
+        return obj.ID === intID
+    })
+}
+
+let batchCompletion = (number, callback) => {
+    if (number) {
+        batchTotalNumber = number
+        batchCallback = callback
+        batchCount = 0
+    } else {
+        batchCount++
+        if (batchCount >= batchTotalNumber) {
+            batchCallback()
+        }
+    }
+}
+
+let getQuestions = () => {
+    connection = dbConnect()
+    connection.connect(function (err) {
+        if (err) throw err;
+        connection.query("SELECT * FROM question", function (err, result, fields) {
+            if (err) throw err;
+            questions = JSON.parse(JSON.stringify(result))
+            batchCompletion(questions.length, getQuestionsComplete)
+            for (let i = 0; i < questions.length; i++) {
+                let id = questions[i]['ID']
+                connection.query("SELECT * FROM answer WHERE questionID = " + id, function (err, result, fields) {
+                    if (err) throw err
+                    let answers = JSON.parse(JSON.stringify(result))
+                    let question = findQuestion(answers[0].questionID)
+                    question[0].answers = answers
+                    batchCompletion()
+                })
+            }
+        });
+    });}
+
+let addQuestion = (req, res) => {
+    let body = "";
+
+    request.on("data", function (chunk) {
+        body += chunk;
+    });
+
+    request.on('end', () => {
+        let data = JSON.parse(body);
+        for (let i = 0; i < data.length; i++) {
+            let question = data[i]
+            console.log(question);
+            connection.query("INSERT INTO question VALUES (NULL, '" + question["text"] + "')")
+        }
+    });
+
+    res.end("updated")
 }
 
 let updateQuestion = () => {
@@ -58,7 +132,6 @@ let checkEmptyURL = (req) => {
 // Request handling
 let handleRequest = (req, res) => {
     req = checkEmptyURL(req)
-
     /**
      * Special Request filtering. Add cases to bypass standard file response.
      */
@@ -92,12 +165,14 @@ let standardFileRequest = (req, res) => {
 }
 
 let handleQuestions = (req, res) => {
+    request = req
+    response = res
     if (req.method === "GET") {
         getQuestions()
     } else if (req.method === "POST") {
-        addQuestion()
+        addQuestion(req, res)
     } else if (req.method === "PUT") {
-        updateQuestion()
+        updateQuestion(req, res)
     }
 }
 
@@ -105,7 +180,7 @@ let handleQuestions = (req, res) => {
 https.createServer(options, handleRequest).listen(443);
 
 http.createServer(function (req, res) {
-    res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+    res.writeHead(301, {"Location": "https://" + req.headers['host'] + req.url});
     res.end();
 }).listen(80);
 
